@@ -7,7 +7,7 @@ class VolunteerProject{
     Date StartDate;
     Date EndDate;
 
-    volunteerProject(String _title, String _description, Date _startDate, Date _endDate){
+    public volunteerProject(String _title, String _description, Date _startDate, Date _endDate){
         Title = _title;
         Description = _description;
         StartDate = _startDate;
@@ -47,3 +47,4 @@ class VolunteerProject{
     }
 
 }
+
