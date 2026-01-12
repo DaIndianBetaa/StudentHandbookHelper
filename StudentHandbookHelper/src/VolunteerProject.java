@@ -7,9 +7,11 @@ class VolunteerProject{
     Date StartDate;
     Date EndDate;
 
-    volunteerProject(String _title, String _description, Date startDate, Date endDate){
+    volunteerProject(String _title, String _description, Date _startDate, Date _endDate){
         Title = _title;
         Description = _description;
+        StartDate = _startDate;
+        EndDate = _endDate;
     }
 
     public String getTitle() {
@@ -43,4 +45,5 @@ class VolunteerProject{
     public void setStartDate(Date startDate) {
         StartDate = startDate;
     }
+
 }
