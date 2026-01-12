@@ -1,4 +1,4 @@
-import java.io.*
+import java.io.*;
 
 class Date{
     private int month;
@@ -38,4 +38,5 @@ class Date{
     public int getYear() {
         return year;
     }
+
 }
