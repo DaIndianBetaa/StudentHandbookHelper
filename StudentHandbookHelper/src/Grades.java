@@ -3,24 +3,39 @@ import java.util.ArrayList;
 
 public class Grades {
 
-	private ArrayList<String> grades;
-	private ArrayList<Integer> gradeCredits;
+	private ArrayList<String> grades = new ArrayList<>();
+    private ArrayList<Integer> gradeCredits = new ArrayList<>();
+
 	
 	//accepts letter grades with their respective credit values.
 	//type "X" or "x" to STOP adding grades.
 	public void addGrade(){
-		Scanner gradeScanner = new Scanner(System.in);
-		Scanner creditScanner = new Scanner(System.in);
-		boolean run = true;
-		while(run) {
-			String grade = gradeScanner.nextLine();
-			int credit = creditScanner.nextInt();
-			if (grade.equals("X") || grade.equals("x")) {
-			run = false;
-			}
-			else {
-				grades.add(grade); 
-				gradeCredits.add(credit);
+		Scanner scanner = new Scanner(System.in);
+		boolean run = true;	
+		while(run) {	
+			System.out.print("Enter grade (A, B+, C-, etc.) or X to stop: ");
+	     	String grade = scanner.nextLine();
+			
+			System.out.print("Enter credit value earned in this couse: ");
+			int credit = Scanner.nextInt();
+
+			grades.add(grade); 
+		    gradeCredits.add(credit);
+
+			System.out.print("Add another class? (Y/N): ");
+            String choice = scanner.nextLine().trim();
+			while (true) {
+				if (choice.equalsIgnoreCase("N")) {
+					System.out.println("Stopping grade entry.");
+		            run = false;
+				}
+				if (choice.equalsIgnoreCase("Y")) {
+			        break;
+			    } else if (choice.equalsIgnoreCase("N")) {
+			        run = false;
+			    } else {
+			        System.out.println("Uhhh… what? That wasn’t Y or N. Try again.");
+			    }
 			}
 		}
 	}
