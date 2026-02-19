@@ -1,21 +1,35 @@
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.io.File;
 
 public class Assignment {
 	private int id;
 	private String name;
-	private int priority;
-	private String dueDate;
+	private double priority;
+	private LocalDate dueDate;
 	private double pointsWorth;
 	private double pointsScored;
+	private double daysUntil;
 	
-	public Assignment(int id, String name, int priority, String dueDate, double pointsWorth, double pointsScored) {
+	
+	public Assignment(int id, String name, int priority, LocalDate dueDate, double pointsWorth, double pointsScored) {
 		this.setId(id);
 		this.setName(name);
 		this.setPriority(priority);
 		this.setPointsWorth(pointsWorth);
 		this.setPointsScored(pointsScored);
 		this.setDueDate(dueDate);
+		this.setDaysUntil();
+		
+	}
+	public Assignment(int id, String name, LocalDate dueDate, double pointsWorth, double pointsScored) {
+		this.setId(id);
+		this.setName(name);
+		this.setPriority(pointsWorth / daysUntil);
+		this.setPointsWorth(pointsWorth);
+		this.setPointsScored(pointsScored);
+		this.setDueDate(dueDate);
+		this.setDaysUntil();
 	}
 
 	public String getName() {
@@ -26,19 +40,19 @@ public class Assignment {
 		this.name = name;
 	}
 
-	public int getPriority() {
+	public double getPriority() {
 		return priority;
 	}
 
-	public void setPriority(int priority) {
+	public void setPriority(double priority) {
 		this.priority = priority;
 	}
 
-	public String getDueDate() {
+	public LocalDate getDueDate() {
 		return dueDate;
 	}
 
-	public void setDueDate(String dueDate) {
+	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
 
@@ -66,6 +80,18 @@ public class Assignment {
 		this.id = id;
 	}
 	
+	public double getPercentage() {
+		return (pointsScored/pointsWorth) * 100;
+	}
 	
+	public void setDaysUntil() {
+		daysUntil = ChronoUnit.DAYS.between(LocalDate.now(), dueDate); //Looked into the java.time library and found ChronoUnit which should work
+	}
+	
+	public boolean isCompleted() {
+		return pointsScored >= 0;
+	}
+	
+	public String toFileString;
 	
 }
