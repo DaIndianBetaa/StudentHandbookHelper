@@ -1,13 +1,14 @@
 import java.io.*;
+import java.time.LocalDate;
 
 
 class VolunteerProject{
     String Title;
     String Description;
-    Date StartDate;
-    Date EndDate;
+    LocalDate StartDate;
+    LocalDate EndDate;
 
-    public volunteerProject(String _title, String _description, Date _startDate, Date _endDate){
+    public VolunteerProject(String _title, String _description, LocalDate _startDate, LocalDate _endDate){
         Title = _title;
         Description = _description;
         StartDate = _startDate;
@@ -30,19 +31,19 @@ class VolunteerProject{
         Description = description;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return EndDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         EndDate = endDate;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return StartDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         StartDate = startDate;
     }
 
