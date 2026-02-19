@@ -10,33 +10,37 @@ public class Grades {
 	//accepts letter grades with their respective credit values.
 	//type "X" or "x" to STOP adding grades.
 	public void addGrade(){
-		Scanner scanner = new Scanner(System.in);
-		boolean run = true;	
-		while(run) {	
+		boolean run = true;
+		while(run) {
+            Scanner scanner = new Scanner(System.in);
 			System.out.print("Enter grade (A, B+, C-, etc.) or X to stop: ");
 	     	String grade = scanner.nextLine();
+            if(grade.equalsIgnoreCase("X")) {
+                run = false;
+                break;
+            }
 			
-			System.out.print("Enter credit value earned in this couse: ");
-			int credit = Scanner.nextInt();
+			System.out.print("Enter credit value earned in this course: ");
+			int credit = scanner.nextInt();
 
 			grades.add(grade); 
 		    gradeCredits.add(credit);
 
-			System.out.print("Add another class? (Y/N): ");
-            String choice = scanner.nextLine().trim();
-			while (true) {
-				if (choice.equalsIgnoreCase("N")) {
-					System.out.println("Stopping grade entry.");
-		            run = false;
-				}
-				if (choice.equalsIgnoreCase("Y")) {
-			        break;
-			    } else if (choice.equalsIgnoreCase("N")) {
-			        run = false;
-			    } else {
-			        System.out.println("Uhhh… what? That wasn’t Y or N. Try again.");
-			    }
-			}
+//			System.out.print("Add another class? (Y/N): ");
+//            String choice = scanner.nextLine().trim();
+//			while (true) {
+//				if (choice.equalsIgnoreCase("N")) {
+//					System.out.println("Stopping grade entry.");
+//		            run = false;
+//				}
+//				if (choice.equalsIgnoreCase("Y")) {
+//			        break;
+//			    } else if (choice.equalsIgnoreCase("N")) {
+//			        run = false;
+//			    } else {
+//			        System.out.println("Uhhh… what? That wasn’t Y or N. Try again.");
+//			    }
+//			}
 		}
 	}
 	// Course potential credit (gradePoints)is MULTIPLED by its earned credit for every grade.
