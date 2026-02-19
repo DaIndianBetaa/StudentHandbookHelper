@@ -3,16 +3,16 @@ import java.time.LocalDate;
 
 
 class VolunteerProject{
-    String Title;
-    String Description;
-    LocalDate StartDate;
-    LocalDate EndDate;
+    private String Title;
+    private String Description;
+    private LocalDate Date;
+    private Float Hours;
 
-    public VolunteerProject(String _title, String _description, LocalDate _startDate, LocalDate _endDate){
+    public VolunteerProject(String _title, String _description, LocalDate _date, Float _hours){
         Title = _title;
         Description = _description;
-        StartDate = _startDate;
-        EndDate = _endDate;
+        Date = _date;
+        Hours = _hours;
     }
 
     public String getTitle() {
@@ -31,20 +31,18 @@ class VolunteerProject{
         Description = description;
     }
 
-    public LocalDate getEndDate() {
-        return EndDate;
+    public Float getHours() {
+        return Hours;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        EndDate = endDate;
+    public void setHours(Float hours) { Hours = hours; }
+
+    public LocalDate getDate() {
+        return Date;
     }
 
-    public LocalDate getStartDate() {
-        return StartDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        StartDate = startDate;
+    public void setDate(LocalDate date) {
+        Date = date;
     }
 
 }
