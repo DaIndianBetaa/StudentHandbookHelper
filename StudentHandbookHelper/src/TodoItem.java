@@ -17,8 +17,8 @@ public class TodoItem {
 		this.id = id;
 		this.title = title;
 		this.description = description;
-		this.priority = priority;
 		this.dueDate = dueDate;
+		this.priority = priority;
 		completed = false;
 	}
 	
@@ -33,8 +33,8 @@ public class TodoItem {
 		this.id = id;
 		this.title = title;
 		this.description = description;
-		this.priority = (int) calcPriority(daysTillDue());
 		this.dueDate = dueDate;
+		this.priority = (int) calcPriority(daysTillDue());
 		completed = false;
 	}
 	
@@ -49,8 +49,8 @@ public class TodoItem {
 	}
 	
 	public String toFileString() {
-		List<String> filepath = Arrays.asList(id + "", title, description, priority + "", dueDate.toString()); //all of these used to make displaying information easier (courtesy of Google AI)
-		String result = filepath.stream().map(String::valueOf).collect(Collectors.joining(", \t"));
+		List<String> filepath = Arrays.asList(id + "", title, description, priority + "", dueDate.toString(), completed + ""); //all of these used to make displaying information easier (courtesy of Google AI)
+		String result = filepath.stream().map(String::valueOf).collect(Collectors.joining(","));
 		return result;
 	}
 	public static TodoItem fromFileString(String line) { //auto changed to static since it wouldn't wor for file read write
