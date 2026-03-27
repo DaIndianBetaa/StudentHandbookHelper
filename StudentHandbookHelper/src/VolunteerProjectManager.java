@@ -1,4 +1,5 @@
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class VolunteerProjectManager {
@@ -16,15 +17,31 @@ public class VolunteerProjectManager {
     {
         volunteerProjects.add(_volunteerProject);
     }
-    public Float GetTotalHours()
+
+
+    public void AddProject(String _title, String _description, LocalDate _date, Float _hours)
+    {
+        VolunteerProject temp = new VolunteerProject(_title, _description, _date, _hours);
+        volunteerProjects.add(temp);
+    }
+
+    public void RemoveProject(String _title)
+    {
+        for(int i = 0; i < volunteerProjects.size(); i++){
+            if (volunteerProjects.get(i).getTitle().equals(_title)){
+                volunteerProjects.remove(i);
+                break;
+            }
+        }
+    }
+
+
+    public Float getTotalHours()
     {
         Float totalHours = 0f;
         for(int i = 0; i < volunteerProjects.size(); i++){
             totalHours += volunteerProjects.get(i).getHours();
         }
         return totalHours;
-    }
-    public void SaveToFile(){
-
     }
 }
