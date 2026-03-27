@@ -1,0 +1,12 @@
+[
+  ["English", "A", 1],
+  ["Math", "B+", 2],
+  ["Science", "A", 1],
+  ["History & Social Science", "A-", 1],
+  ["World Language", "A", 2],
+  ["Health and PE", "A+", 1],
+  ["CTE or Fine Arts", "A+", 1],
+  ["Elective", "C+", 1],
+  ["Economics", "", 0],
+  ["Personal Finance", "", 0]
+]
