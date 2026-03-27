@@ -1,10 +1,13 @@
 import java.awt.EventQueue;
 import java.awt.GridLayout;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
+
 import java.awt.*;
 
 public class GUITest {
@@ -31,8 +34,9 @@ public class GUITest {
 
 	/**
 	 * Create the application.
+	 * @throws ParseException 
 	 */
-	public GUITest() {
+	public GUITest() throws ParseException {
 		todoManager = new TodoList("todos.csv");
 		todoManager.loadFromFile();
 		initialize();
@@ -40,17 +44,19 @@ public class GUITest {
 
 	/**
 	 * Initialize the contents of the frame.
+	 * @throws ParseException 
 	 */
-	private void initialize() {
+	private void initialize() throws ParseException {
         frame = new JFrame("Add To-Do");
         frame.setBounds(100, 100, 400, 300);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new GridLayout(6, 2, 10, 10));
 
         // Fields
+        MaskFormatter yearMask = new MaskFormatter("####-##-##");
         JTextField titleField = new JTextField();
         JTextField descField = new JTextField();
-        JTextField dateField = new JTextField("");
+        JFormattedTextField dateField = new JFormattedTextField(yearMask);
         dateField.setToolTipText("YYYY-MM-DD");
         JTextField priorityField = new JTextField("");
         priorityField.setToolTipText("Leave blank to auto-calculate");
