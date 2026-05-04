@@ -1,6 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 
 // credit : google, my mom, & copilot for helping create the new JFrame uses / features like JPanel use. overall code troubleshooting.
@@ -27,6 +31,7 @@ public class StudentHelperMain extends JFrame {
     private NavLabel lblSettings;
 
     private String studentName = "Student";
+    private static final String preferenceFilePath = "preferences.txt";
 
     //setting mods
     private boolean darkMode = false;
@@ -38,6 +43,8 @@ public class StudentHelperMain extends JFrame {
     private BaseView assignmentsView = new AssignmentsView();
 
     public StudentHelperMain() {
+    	loadPreferences();
+    	
         setTitle("Student Helper Dashboard");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -46,13 +53,63 @@ public class StudentHelperMain extends JFrame {
         add(createLeftPanel(), BorderLayout.WEST);
         add(createRightContainer(), BorderLayout.CENTER);
 
+        applySettings();
+        
         setVisible(true);
+        
+        savePreferences();
 
         SwingUtilities.invokeLater(() -> {
             StartupReminderDialog.show(this);
         });
     }
 
+    //ai helped with preferences file key matching
+    private void loadPreferences() {
+        File file = new File(preferenceFilePath);
+        if (!file.exists()) {
+        	return;
+        }
+
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(":")) {
+                    String[] parts = line.split(":", 2);
+                    String key = parts[0].trim();
+                    String value = parts[1].trim();
+
+
+                    if (key.equals("name")) studentName = value;
+                    else if (key.equals("darkMode")) darkMode = Boolean.parseBoolean(value);
+                    else if (key.equals("fontSize")) fontSize = Integer.parseInt(value);
+                    else if (key.equals("accentIndex")) accentIndex = Integer.parseInt(value);
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            System.out.println("Error reading preferences. Using defaults.");
+        }
+    }
+
+
+    private void savePreferences() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(preferenceFilePath))) {
+            writer.write("name:" + studentName);
+            writer.newLine();
+            writer.write("darkMode:" + darkMode);
+            writer.newLine();
+            writer.write("fontSize:" + fontSize);
+            writer.newLine();
+            writer.write("accentIndex:" + accentIndex);
+            writer.newLine();
+        } catch (IOException e) {
+            System.out.println("Error writing preferences: " + e.getMessage());
+        }
+    }
+
+
+    
     private JPanel createLeftPanel() {
         leftPanel = new JPanel();
         leftPanel.setPreferredSize(new Dimension(200, 600));
@@ -102,10 +159,10 @@ public class StudentHelperMain extends JFrame {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 40, 0));
         bottomPanel.add(lblSettings, BorderLayout.NORTH);
         
-        lblTodoList.setForeground(new Color(240,240,240));
-        lblGrades.setForeground(new Color(240,240,240));
-        lblAssignments.setForeground(new Color(240,240,240));
-        lblSettings.setForeground(new Color(240,240,240));
+        lblTodoList.setForeground(new Color(248,245,252));
+        lblGrades.setForeground(new Color(248,245,252));
+        lblAssignments.setForeground(new Color(248,245,252));
+        lblSettings.setForeground(new Color(248,245,252));
 
         leftPanel.add(iconPanel, BorderLayout.NORTH);
         leftPanel.add(navWrapper, BorderLayout.CENTER);
@@ -180,7 +237,8 @@ public class StudentHelperMain extends JFrame {
         darkMode = dialog.isDarkMode();
         fontSize = dialog.getFontSize();
         accentIndex = dialog.getAccentIndex();
-
+        
+        savePreferences();
         applySettings();
     }
 
@@ -215,7 +273,7 @@ public class StudentHelperMain extends JFrame {
         UIManager.put("ScrollPane.background", rightBg);
         UIManager.put("Viewport.background", rightBg);
 
-        Font baseFont = new Font("SansSerif", Font.PLAIN, fontSize);
+        Font baseFont = new Font("SansSerif", Font.BOLD, fontSize);
         UIManager.put("Label.font", baseFont);
         UIManager.put("Button.font", baseFont);
         UIManager.put("TextField.font", baseFont);
@@ -252,7 +310,7 @@ public class StudentHelperMain extends JFrame {
         aclLabel.setFont(new Font("SansSerif", Font.BOLD, Math.max(10, fontSize - 2)));
         csProjLabel.setFont(new Font("SansSerif", Font.PLAIN, Math.max(10, fontSize - 2)));
 
-        Font navFont = new Font("SansSerif", Font.PLAIN, fontSize);
+        Font navFont = new Font("SansSerif", Font.BOLD, fontSize);
         lblTodoList.setFont(navFont);
         lblGrades.setFont(navFont);
         lblAssignments.setFont(navFont);
