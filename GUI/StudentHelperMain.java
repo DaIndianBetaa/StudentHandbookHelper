@@ -320,6 +320,27 @@ public class StudentHelperMain extends JFrame {
         repaint();
     }
 
+    private Font customFont(String font, float size) {
+    	Font newFont = null;
+    	try {
+            // 1. Load the font file
+            File fontFile = new File(font);
+            newFont = Font.createFont(Font.TRUETYPE_FONT, fontFile);
+
+            // 2. Register the font with the Graphics Environment
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(newFont);
+
+            // 3. Use the font (set the size, as createFont defaults to 1pt)
+            newFont = newFont.deriveFont(size); 
+
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+            // Fallback to a logical font if loading fails
+            return new Font("SansSerif", Font.PLAIN, (int)size);
+        }
+    	return newFont;
+    }
 
 
     public static void main(String[] args) {
