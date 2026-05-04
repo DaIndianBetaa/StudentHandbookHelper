@@ -41,7 +41,7 @@ public class TodoItem {
 	
 	
 	public boolean isDueSoon() {
-		return ChronoUnit.DAYS.between(LocalDate.now(), dueDate) <= 1;
+		return ChronoUnit.DAYS.between(LocalDate.now(), dueDate) <= 3;
 	}
 	
 	public double daysTillDue() {
@@ -64,7 +64,9 @@ public class TodoItem {
 
         TodoItem item = new TodoItem(id, title, description, dueDate);
         item.priority = (int) priority;
-        if (completed) item.setCompleted(true);
+        if (completed) {
+        	item.setCompleted(true);
+        }
         return item;
     }
 

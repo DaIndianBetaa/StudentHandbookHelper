@@ -8,7 +8,10 @@ public class NavLabel extends JLabel {
 
     public NavLabel(String text) {
         super(text);
-        setFont(new Font("Arial", Font.PLAIN, 16));
+        setFont(new Font("SansSerif", Font.BOLD, 14));
+        
+        setForeground(new Color(248,245,252));
+        
         setCursor(new Cursor(Cursor.HAND_CURSOR)); // makes cursor a hand when label is hovered over
     }
 }

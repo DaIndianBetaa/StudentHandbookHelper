@@ -48,7 +48,6 @@ public class GradesView extends BaseView {
            }
        };
 
-
        loadJsonData();
 
 
