@@ -6,8 +6,14 @@ import javax.swing.text.BadLocationException;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -19,7 +25,7 @@ public class GradesView extends BaseView {
    private JTable table;
    private DefaultTableModel model;
    private JLabel gpaTitleLabel;
-   private JLabel gpaValueLabel;
+   private GradientLabel gpaValueLabel;
    private JButton calcButton;
    private JButton saveButton;
    private JButton undoButton;
@@ -40,6 +46,7 @@ public class GradesView extends BaseView {
        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
 
+       // --------------- Shows Table --------------- 
        model = new DefaultTableModel(new Object[]{"Course Title", "Mark/Grade", "Credits"}, 0) {
            @Override
            // This will return false for fi
@@ -47,6 +54,7 @@ public class GradesView extends BaseView {
                return col != 0; // Course Title not editable
            }
        };
+
 
        loadJsonData();
 
@@ -66,7 +74,7 @@ public class GradesView extends BaseView {
        table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(creditField));
 
 
-       // Detect changes
+       // Detect changes in a table 
        model.addTableModelListener(e -> {
            hasChanges = true;
            calcButton.setEnabled(true);
@@ -74,11 +82,11 @@ public class GradesView extends BaseView {
            undoButton.setEnabled(true);
        });
 
-
+       // Adds scroll bar to table when needed (dimension dependent)
        JScrollPane scroll = new JScrollPane(table);
 
 
-       // GPA panel
+       // --------------- GPA panel --------------- 
        JPanel gpaPanel = new JPanel();
        gpaPanel.setLayout(new BoxLayout(gpaPanel, BoxLayout.Y_AXIS));
        gpaPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
@@ -88,10 +96,10 @@ public class GradesView extends BaseView {
        gpaTitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 22));
        gpaTitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-
-       gpaValueLabel = new JLabel(String.format("%.2f", calculateGPA()));
+       gpaValueLabel = new GradientLabel(String.format("%.2f", calculateGPA())); // easy way to format to 2 decimal points
        gpaValueLabel.setFont(new Font("Segoe UI", Font.BOLD, 45));
-       gpaValueLabel.setForeground(Color.GRAY);
+       gpaValueLabel.setPreferredSize(new Dimension(150,60));
+       gpaValueLabel.setForeground(Color.black);
        gpaValueLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 
@@ -103,7 +111,7 @@ public class GradesView extends BaseView {
 
        //gpaPanel.add(gpaLabel);
        gpaPanel.add(gpaTitleLabel);
-       gpaPanel.add(Box.createVerticalStrut(5));
+       gpaPanel.add(Box.createVerticalStrut(5)); // spacer
        gpaPanel.add(gpaValueLabel);
        gpaPanel.add(Box.createVerticalStrut(20));
        gpaPanel.add(calcButton);
@@ -155,8 +163,8 @@ public class GradesView extends BaseView {
    //   No trailing comma on the last row
    private void loadJsonData() {
        try {
-           System.out.println("Working directory: " + new File(".").getAbsolutePath());
-           List<String> lines = Files.readAllLines(Paths.get(jsonFile));
+           System.out.println("Working directory: " + new File(".").getAbsolutePath()); // for troubleshooting / where computer is looking for JSON
+           List<String> lines = Files.readAllLines(Paths.get(jsonFile)); // retrieves "jsonFile". Make sure it is in src and matches the name to be accessed.
            StringBuilder sb = new StringBuilder();
            for (String line : lines) sb.append(line.trim());
 
@@ -171,7 +179,7 @@ public class GradesView extends BaseView {
            // Split into rows
            String[] rows = json.split("],");
 
-
+           // new tip: use colons as a shortcut of initialization and number of interations.
            for (String row : rows) {
                row = row.replace("[", "").replace("]", "").trim();
                String[] parts = row.split(",");
@@ -189,6 +197,14 @@ public class GradesView extends BaseView {
        } catch (Exception ex) {
            ex.printStackTrace();
            JOptionPane.showMessageDialog(null, "Error loading JSON file.");
+           File yourFile = new File("grades.jsn"); //credit: stackoverflow
+           try {
+			yourFile.createNewFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+           
        }
    }
 
@@ -252,7 +268,7 @@ public class GradesView extends BaseView {
 
    // --- GPA CALCULATION ---
    private void updateGPA() {
-       gpaValueLabel.setText(String.format("%.2f", calculateGPA()));
+       gpaValueLabel.setText(String.format("%.2f", calculateGPA())); // 
        calcButton.setEnabled(false);
    }
 
@@ -268,8 +284,7 @@ public class GradesView extends BaseView {
            String gradeString = model.getValueAt(i, 1).toString();
            double numCredit = Double.parseDouble(model.getValueAt(i, 2).toString());
 
-
-           if (gradeString.isEmpty() || numCredit == 0) continue;
+           if (gradeString.isEmpty() || numCredit == 0) continue; // if blank, then credits are 0 (so it is multiplied) and doesn't get counted
 
 
            totalPoints += letterGradeToVal(gradeString) * numCredit;
@@ -303,7 +318,7 @@ public class GradesView extends BaseView {
    // JTextField don’t validate input by default. PlainDocument is the
    // default text model used by JTextField. The Credits column should only
    // allow digits + optional decimal.
-   // By extending PlainDocument, we can intercept text insertions.
+   // By extending PlainDocument, we can intercept text insertions. CRED: copilot
    class NumericDocument extends PlainDocument {
        @Override
        public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
@@ -312,6 +327,39 @@ public class GradesView extends BaseView {
            }
        }
    }
+   
+   // Can make labels with GRADIENT COLORS!
+   // Jlabel has no function for gradients and must be overided with graphics.
+   // credits: Gemini for how to format the font's gradient to the string location, 
+   // and how to use antialiasing so that the font looks less choppy.
+   class GradientLabel extends JLabel {
+	    private Color startColor = new Color(0x6366F1); // light indigo
+	    private Color endColor = new Color(0xA855F7);   // Purple
+
+	    public GradientLabel(String text) {
+	        super(text);
+	    }
+
+	    @Override
+	    protected void paintComponent(Graphics g) {
+	        Graphics2D g2 = (Graphics2D) g.create();
+	        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+	        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+	        // Create a horizontal gradient across the width of the label
+	        GradientPaint gd = new GradientPaint(0, 0, startColor, getWidth(), 0, endColor);
+	        g2.setPaint(gd);
+
+	        FontMetrics fm = g2.getFontMetrics();
+	        int x = (getWidth() - fm.stringWidth(getText())) / 2; // Center horizontally
+	        int y = ((getHeight() - fm.getHeight()) / 2) + fm.getAscent(); // Center vertically
+
+	        g2.setFont(getFont());
+	        g2.drawString(getText(), x, y);
+	    }
+	}
+
+
 
 
 }

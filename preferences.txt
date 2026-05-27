@@ -1,0 +1,4 @@
+name:Student
+darkMode:false
+fontSize:18
+accentIndex:0

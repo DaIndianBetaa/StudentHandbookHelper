@@ -25,7 +25,7 @@ public class TodoList {
 	public void markComplete(int id) {
 		for (TodoItem item: todos) {
 			if (item.getId() == id) {
-				item.setCompleted(true);
+				item.setCompleted(!item.isCompleted());
 				return; //added this so it saves time and doesn't check the rest of arraylist
 			}
 		}

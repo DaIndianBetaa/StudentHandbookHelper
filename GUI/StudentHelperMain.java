@@ -40,12 +40,12 @@ public class StudentHelperMain extends JFrame {
 
     private BaseView projectsView = new TodoListView();
     private BaseView gradesView = new GradesView();
-    private BaseView assignmentsView = new AssignmentsView();
+    private BaseView volunteerView = new ProjectsView();
 
     public StudentHelperMain() {
     	loadPreferences();
     	
-        setTitle("Student Helper Dashboard");
+        setTitle("StarStudent");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -123,7 +123,7 @@ public class StudentHelperMain extends JFrame {
         java.net.URL iconUrl = getClass().getResource("icon-person.png");
         if (iconUrl != null) {
             ImageIcon rawIcon = new ImageIcon(iconUrl);
-            Image scaled = rawIcon.getImage().getScaledInstance(128, 128, Image.SCALE_SMOOTH);
+            Image scaled = rawIcon.getImage().getScaledInstance(1182/6, 329/6, Image.SCALE_SMOOTH);
             icon.setIcon(new ImageIcon(scaled));
         } else {
             icon.setText("No Icon");
@@ -170,7 +170,7 @@ public class StudentHelperMain extends JFrame {
 
         lblTodoList.addMouseListener(new SimpleClick(() -> showView(projectsView))); 
         lblGrades.addMouseListener(new SimpleClick(() -> showView(gradesView)));     
-        lblAssignments.addMouseListener(new SimpleClick(() -> showView(assignmentsView)));
+        lblAssignments.addMouseListener(new SimpleClick(() -> showView(volunteerView)));
         lblSettings.addMouseListener(new SimpleClick(this::openSettings));
 
         return leftPanel;
@@ -235,7 +235,10 @@ public class StudentHelperMain extends JFrame {
         }
 
         darkMode = dialog.isDarkMode();
-        fontSize = dialog.getFontSize();
+        if (!(dialog.getFontSize() < 12)) {
+        	fontSize = dialog.getFontSize();
+        }
+        
         accentIndex = dialog.getAccentIndex();
         
         savePreferences();
@@ -256,7 +259,7 @@ public class StudentHelperMain extends JFrame {
 
         if (darkMode) {
             // Sidebar follows selected accent color (darkened for contrast)
-            navBg = accent.darker().darker();
+            navBg = accent.darker();
             rightBg = new Color(25, 25, 35);
             rightFg = new Color(240, 240, 240);
             footerFg = new Color(160, 160, 160);
@@ -282,9 +285,15 @@ public class StudentHelperMain extends JFrame {
         UIManager.put("List.font", baseFont);
 
         SwingUtilities.updateComponentTreeUI(this);
-        if (projectsView != null) SwingUtilities.updateComponentTreeUI(projectsView.show());
-        if (gradesView != null) SwingUtilities.updateComponentTreeUI(gradesView.show());
-        if (assignmentsView != null) SwingUtilities.updateComponentTreeUI(assignmentsView.show());
+        if (projectsView != null) {
+        	SwingUtilities.updateComponentTreeUI(projectsView.show());
+        }
+        if (gradesView != null) {
+        	SwingUtilities.updateComponentTreeUI(gradesView.show());
+        }
+        if (volunteerView != null) {
+        	SwingUtilities.updateComponentTreeUI(volunteerView.show());
+        }
 
         leftPanel.setBackground(navBg);
         iconPanel.setBackground(navBg);
@@ -310,11 +319,14 @@ public class StudentHelperMain extends JFrame {
         aclLabel.setFont(new Font("SansSerif", Font.BOLD, Math.max(10, fontSize - 2)));
         csProjLabel.setFont(new Font("SansSerif", Font.PLAIN, Math.max(10, fontSize - 2)));
 
+        
         Font navFont = new Font("SansSerif", Font.BOLD, fontSize);
         lblTodoList.setFont(navFont);
         lblGrades.setFont(navFont);
         lblAssignments.setFont(navFont);
         lblSettings.setFont(navFont);
+        
+        SwingUtilities.updateComponentTreeUI(this);
 
         revalidate();
         repaint();

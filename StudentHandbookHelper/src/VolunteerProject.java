@@ -45,6 +45,12 @@ class VolunteerProject{
         Date = date;
     }
 
+    @Override
+    public String toString() {
+        return  Title + '\n' +
+                Hours + " hours \t" +
+                Date + "\n" +
+                "Description: " + Description + "\n"+"----- \n";
+    }
 }
-
 

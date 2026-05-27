@@ -3,20 +3,16 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
 
 public class TodoListView extends BaseView {
 
     private TodoList todoManager;
     private static final String FILE_PATH = "todos.csv";
-
     private DefaultTableModel tableModel;
     private JTable table;
 
     @Override
     public JPanel show() {
-
         todoManager = new TodoList(FILE_PATH);
         todoManager.loadFromFile();
 
@@ -30,54 +26,43 @@ public class TodoListView extends BaseView {
 
         tableModel = new DefaultTableModel(
                 new Object[]{"ID", "Title", "Description", "Due Date", "Priority", "Done"}, 0) {
-
             @Override
-            public boolean isCellEditable(int row, int column) {
-
-                return column == 5;
-            }
-
+            public boolean isCellEditable(int row, int column) { return column == 5; }
             @Override
             public Class<?> getColumnClass(int column) {
-
-                if (column == 5) {
-                    return Boolean.class;
-                }
-                return String.class;
+                return column == 5 ? Boolean.class : String.class;
             }
         };
 
         table = new JTable(tableModel);
         table.setRowHeight(26);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setBackground(Color.WHITE);
+        table.setGridColor(new Color(230, 230, 230));
 
         table.getColumnModel().getColumn(0).setMinWidth(0);
         table.getColumnModel().getColumn(0).setMaxWidth(0);
         table.getColumnModel().getColumn(0).setWidth(0);
 
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 4; i++)
             table.getColumnModel().getColumn(i).setCellRenderer(new TodoRowRenderer());
-        }
 
         tableModel.addTableModelListener(e -> {
-            int row    = e.getFirstRow();
+            int row = e.getFirstRow();
             int column = e.getColumn();
-            if (column == 5) {
-
-                boolean isDone = (Boolean) tableModel.getValueAt(row, 5);
-                int id         = (int) tableModel.getValueAt(row, 0);
-                if (isDone) {
-                    todoManager.markComplete(id);
-                }
+            if (column == 5 && row >= 0) {
+                int id = (int) tableModel.getValueAt(row, 0);
+                todoManager.markComplete(id);
                 todoManager.saveToFile();
-
                 table.repaint();
             }
         });
 
         populateTable();
 
-        panel.add(new JScrollPane(table), BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(buildBottomPanel(), BorderLayout.SOUTH);
         return panel;
     }
@@ -86,23 +71,13 @@ public class TodoListView extends BaseView {
         tableModel.setRowCount(0);
         for (TodoItem item : todoManager.getTodos()) {
             double days = item.daysTillDue();
-
-            String dueDisplay;
-            if (days < 0) {
-
-                dueDisplay = "OVERDUE (" + (int) -days + "d)";
-            } else {
-                dueDisplay = item.getDueDate().toString();
-            }
+            String dueDisplay = days < 0
+                ? "OVERDUE (" + (int) -days + "d)"
+                : item.getDueDate().toString();
 
             tableModel.addRow(new Object[]{
-                item.getId(),
-                item.getTitle(),
-                item.getDescription(),
-                dueDisplay,
-                item.getPriority(),
-                item.isCompleted()   
-
+                item.getId(), item.getTitle(), item.getDescription(),
+                dueDisplay, item.getPriority(), item.isCompleted()
             });
         }
     }
@@ -110,13 +85,13 @@ public class TodoListView extends BaseView {
     private JPanel buildBottomPanel() {
         JPanel bottom = new JPanel(new BorderLayout(10, 0));
         bottom.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
+        bottom.setOpaque(false);
 
         JButton btnAdd = new JButton("+ Add");
-        JButton btnRemove = new JButton("X Remove");
+        JButton btnRemove = new JButton("✕ Remove");
 
         btnAdd.setBackground(new Color(60, 130, 80));
         btnAdd.setForeground(Color.WHITE);
-
         btnRemove.setBackground(new Color(180, 60, 60));
         btnRemove.setForeground(Color.WHITE);
 
@@ -127,6 +102,7 @@ public class TodoListView extends BaseView {
         btnRemove.addActionListener(e -> onRemove());
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        actionPanel.setOpaque(false);
         actionPanel.add(btnAdd);
         actionPanel.add(btnRemove);
         bottom.add(actionPanel, BorderLayout.WEST);
@@ -138,9 +114,11 @@ public class TodoListView extends BaseView {
             "Due Date ↑", "Due Date ↓", "Priority ↑", "Priority ↓", "Title A–Z", "Title Z–A"
         });
         sortCombo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        sortCombo.setBackground(Color.WHITE);
         sortCombo.addActionListener(e -> onSort(sortCombo.getSelectedIndex()));
 
         JPanel sortPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        sortPanel.setOpaque(false);
         sortPanel.add(sortLabel);
         sortPanel.add(sortCombo);
         bottom.add(sortPanel, BorderLayout.EAST);
@@ -153,39 +131,157 @@ public class TodoListView extends BaseView {
         button.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         button.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
         button.setOpaque(true);
+        button.setBorderPainted(false);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
     private void onAdd() {
+        Color lightBg = Color.WHITE;
+        Color lightFg = new Color(30, 30, 30);
+
         JTextField titleField = new JTextField();
         JTextField descField = new JTextField();
         JTextField priorityField = new JTextField();
         priorityField.setToolTipText("Leave blank to auto-calculate");
 
-        JSpinner yearSpinner = new JSpinner(new SpinnerNumberModel(
-                LocalDate.now().getYear(), 2000, 2100, 1));
-        JSpinner monthSpinner = new JSpinner(new SpinnerNumberModel(
-                LocalDate.now().getMonthValue(), 1, 12, 1));
-        JSpinner daySpinner = new JSpinner(new SpinnerNumberModel(
-                LocalDate.now().getDayOfMonth(), 1, 31, 1));
+        for (JTextField f : new JTextField[]{titleField, descField, priorityField}) {
+            f.setBackground(lightBg);
+            f.setForeground(lightFg);
+            f.setCaretColor(lightFg);
+        }
 
+        JSpinner yearSpinner = new JSpinner(new SpinnerNumberModel(LocalDate.now().getYear(), 2000, 2100, 1));
+        JSpinner monthSpinner = new JSpinner(new SpinnerNumberModel(LocalDate.now().getMonthValue(), 1, 12, 1));
+        JSpinner daySpinner = new JSpinner(new SpinnerNumberModel(LocalDate.now().getDayOfMonth(), 1, 31, 1));
         yearSpinner.setEditor(new JSpinner.NumberEditor(yearSpinner, "#"));
 
+        for (JSpinner sp : new JSpinner[]{yearSpinner, monthSpinner, daySpinner}) {
+            sp.setBackground(lightBg);
+            sp.setForeground(lightFg);
+            JComponent editor = sp.getEditor();
+            editor.setBackground(lightBg);
+            editor.setForeground(lightFg);
+            if (editor instanceof JSpinner.DefaultEditor) {
+                JTextField tf = ((JSpinner.DefaultEditor) editor).getTextField();
+                tf.setBackground(lightBg);
+                tf.setForeground(lightFg);
+                tf.setCaretColor(lightFg);
+            }
+        }
+
         JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        datePanel.add(new JLabel("Year:"));
+        datePanel.setBackground(lightBg);
+        JLabel yearLbl = new JLabel("Year:");
+        JLabel monthLbl = new JLabel("Month:");
+        JLabel dayLbl = new JLabel("Day:");
+        yearLbl.setForeground(lightFg);
+        monthLbl.setForeground(lightFg);
+        dayLbl.setForeground(lightFg);
+        datePanel.add(yearLbl);
         datePanel.add(yearSpinner);
-        datePanel.add(new JLabel("Month:"));
+        datePanel.add(Box.createHorizontalStrut(4));
+        datePanel.add(monthLbl);
         datePanel.add(monthSpinner);
-        datePanel.add(new JLabel("Day:"));
+        datePanel.add(Box.createHorizontalStrut(4));
+        datePanel.add(dayLbl);
         datePanel.add(daySpinner);
 
-        int result = JOptionPane.showConfirmDialog(table, new Object[]{
-            "Title:", titleField,
-            "Description:", descField,
-            "Due Date:", datePanel,
-            "Priority (optional):", priorityField
-        }, "Add To-Do", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        JPanel form = new JPanel(new GridBagLayout());
+        form.setBackground(lightBg);
+        form.setBorder(BorderFactory.createEmptyBorder(4, 0, 4, 0));
 
-        if (result != JOptionPane.OK_OPTION) return;
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weightx = 1;
+
+        Font labelFont = new Font("Segoe UI", Font.BOLD, 12);
+
+        gbc.gridy = 0;
+        gbc.insets = new Insets(8, 16, 2, 16);
+        JLabel lTitle = new JLabel("Title:");
+        lTitle.setFont(labelFont);
+        lTitle.setForeground(lightFg);
+        form.add(lTitle, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 16, 8, 16);
+        form.add(titleField, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(4, 16, 2, 16);
+        JLabel lDesc = new JLabel("Description:");
+        lDesc.setFont(labelFont);
+        lDesc.setForeground(lightFg);
+        form.add(lDesc, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 16, 8, 16);
+        form.add(descField, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(4, 16, 2, 16);
+        JLabel lDate = new JLabel("Due Date:");
+        lDate.setFont(labelFont);
+        lDate.setForeground(lightFg);
+        form.add(lDate, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 16, 8, 16);
+        form.add(datePanel, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(4, 16, 2, 16);
+        JLabel lPri = new JLabel("Priority (optional):");
+        lPri.setFont(labelFont);
+        lPri.setForeground(lightFg);
+        form.add(lPri, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(0, 16, 8, 16);
+        form.add(priorityField, gbc);
+
+        gbc.gridy++;
+        gbc.weighty = 1.0;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        form.add(Box.createVerticalGlue(), gbc);
+
+        JDialog addDialog = new JDialog(
+            (java.awt.Frame) SwingUtilities.getWindowAncestor(table), "Add To-Do", true);
+        addDialog.getContentPane().setBackground(lightBg);
+        addDialog.setLayout(new BorderLayout());
+        addDialog.add(form, BorderLayout.CENTER);
+
+        boolean[] confirmed = {false};
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        btnRow.setBackground(new Color(238, 238, 242));
+        btnRow.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(210, 210, 218)));
+
+        JButton okBtn = new JButton("Add");
+        JButton cancelBtn = new JButton("Cancel");
+        okBtn.setBackground(new Color(60, 130, 80));
+        okBtn.setForeground(Color.WHITE);
+        okBtn.setFocusPainted(false);
+        okBtn.setBorderPainted(false);
+        okBtn.setOpaque(true);
+        cancelBtn.setBackground(new Color(230, 230, 235));
+        cancelBtn.setForeground(lightFg);
+        cancelBtn.setFocusPainted(false);
+        cancelBtn.setBorderPainted(false);
+        cancelBtn.setOpaque(true);
+
+        okBtn.addActionListener(e -> { confirmed[0] = true; addDialog.dispose(); });
+        cancelBtn.addActionListener(e -> { confirmed[0] = false; addDialog.dispose(); });
+        btnRow.add(cancelBtn);
+        btnRow.add(okBtn);
+        addDialog.add(btnRow, BorderLayout.SOUTH);
+        addDialog.pack();
+        addDialog.setMinimumSize(new Dimension(340, addDialog.getHeight()));
+        addDialog.setLocationRelativeTo(table);
+        addDialog.setVisible(true);
+
+        if (!confirmed[0]) return;
 
         String title = titleField.getText().trim();
         if (title.isEmpty()) {
@@ -193,13 +289,12 @@ public class TodoListView extends BaseView {
             return;
         }
 
-        int year = (int) yearSpinner.getValue();
-        int month = (int) monthSpinner.getValue();
-        int day = (int) daySpinner.getValue();
-
         LocalDate dueDate;
         try {
-            dueDate = LocalDate.of(year, month, day);
+            dueDate = LocalDate.of(
+                (int) yearSpinner.getValue(),
+                (int) monthSpinner.getValue(),
+                (int) daySpinner.getValue());
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(table, "Invalid date — that day doesn't exist in that month.");
             return;
@@ -208,12 +303,9 @@ public class TodoListView extends BaseView {
         String priText = priorityField.getText().trim();
         TodoItem item;
         try {
-            if (priText.isEmpty()) {
-
-                item = new TodoItem(0, title, descField.getText().trim(), dueDate);
-            } else {
-                item = new TodoItem(0, title, descField.getText().trim(), Integer.parseInt(priText), dueDate);
-            }
+            item = priText.isEmpty()
+                ? new TodoItem(0, title, descField.getText().trim(), dueDate)
+                : new TodoItem(0, title, descField.getText().trim(), Integer.parseInt(priText), dueDate);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(table, "Priority must be a whole number.");
             return;
@@ -235,7 +327,7 @@ public class TodoListView extends BaseView {
         String title = (String) tableModel.getValueAt(row, 1);
 
         int confirm = JOptionPane.showConfirmDialog(
-                table, "Remove \"" + title + "\"?", "Confirm Remove", JOptionPane.YES_NO_OPTION);
+            table, "Remove \"" + title + "\"?", "Confirm Remove", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             todoManager.removeTodo(id);
@@ -245,23 +337,13 @@ public class TodoListView extends BaseView {
     }
 
     private void onSort(int index) {
-        if (index == 0) {
-        	todoManager.sortByDueDate();
-        }
-        else if (index == 1) {
-        	todoManager.sortRevByDueDate();
-        }
-        else if (index == 2) {
-        	todoManager.sortByPriority();
-        }
-        else if (index == 3) {
-        	todoManager.sortRevByPriority();
-        }
-        else if (index == 4) {
-        	todoManager.sortAlphabetically();
-        }
-        else if (index == 5) {
-        	todoManager.sortRevAlphabetically();
+        switch (index) {
+            case 0: todoManager.sortByDueDate(); break;
+            case 1: todoManager.sortRevByDueDate(); break;
+            case 2: todoManager.sortByPriority(); break;
+            case 3: todoManager.sortRevByPriority(); break;
+            case 4: todoManager.sortAlphabetically(); break;
+            case 5: todoManager.sortRevAlphabetically(); break;
         }
         populateTable();
     }
@@ -271,35 +353,35 @@ public class TodoListView extends BaseView {
         public Component getTableCellRendererComponent(
                 JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Component cell = super.getTableCellRendererComponent(
+                table, value, isSelected, hasFocus, row, column);
 
-            if (isSelected) {
-            	return cell;
-            }
+            if (isSelected) return cell;
 
             boolean done = (boolean) table.getValueAt(row, 5);
             String dueStr = table.getValueAt(row, 3).toString();
 
             if (done) {
-                cell.setBackground(new Color(220, 245, 220)); 
-
+                cell.setBackground(new Color(220, 245, 220));
+                cell.setForeground(new Color(100, 130, 100));
             } else if (dueStr.startsWith("OVERDUE")) {
-                cell.setBackground(new Color(255, 220, 220)); 
-
+                cell.setBackground(new Color(255, 220, 220));
+                cell.setForeground(new Color(150, 40, 40));
             } else {
                 try {
                     long days = ChronoUnit.DAYS.between(LocalDate.now(), LocalDate.parse(dueStr));
                     if (days <= 1) {
-                        cell.setBackground(new Color(255, 255, 200)); 
-
+                        cell.setBackground(new Color(255, 255, 200));
+                        cell.setForeground(Color.BLACK);
                     } else {
                         cell.setBackground(Color.WHITE);
+                        cell.setForeground(Color.BLACK);
                     }
                 } catch (Exception e) {
                     cell.setBackground(Color.WHITE);
+                    cell.setForeground(Color.BLACK);
                 }
             }
-
             return cell;
         }
     }
